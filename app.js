@@ -1,17 +1,10 @@
 // ===== Datos editables =====
-const VIDEO_ID = "";   // ID del video de YouTube (lo que va después de v= en el enlace)
-const EMAIL = "";      // Correo que recibirá los mensajes del formulario
+const EMAIL = "pruebaferiacientifica@gmail.com"; // Correo que recibe los mensajes del formulario
 
 document.addEventListener("DOMContentLoaded", () => {
   const anio = document.getElementById("anio");
   if (anio) anio.textContent = new Date().getFullYear();
 
-  const video = document.getElementById("video");
-  if (video) {
-    video.innerHTML = VIDEO_ID
-      ? `<iframe src="https://www.youtube.com/embed/${VIDEO_ID}" title="Video demostrativo de SmartBin AI" allowfullscreen></iframe>`
-      : "<p>🎬 El video demostrativo se publicará próximamente.</p>";
-  }
 
   const codigo = document.getElementById("codigo");
   if (codigo) {
