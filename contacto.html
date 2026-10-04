@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contacto | SmartBin AI</title>
+<meta name="description" content="SmartBin AI: basurero inteligente que clasifica residuos reciclables y no reciclables con Inteligencia Artificial.">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<header><nav>
+<a class="marca" href="index.html"><img src="assets/logo.svg" alt="Logo SmartBin AI">SmartBin AI</a>
+<a class="enlace" href="index.html">Inicio</a><a class="enlace" href="mision-vision.html">Misión y Visión</a><a class="enlace" href="proyecto.html">Proyecto</a><a class="enlace activo" href="contacto.html">Contacto</a>
+</nav></header>
+<main>
+
+<section>
+<h2>Centro de contacto y soporte</h2>
+<div class="grid">
+<div class="card">
+<h3>Escríbenos</h3>
+<form id="form-contacto">
+<label for="nombre">Nombre</label><input id="nombre" name="nombre" required>
+<label for="correo">Correo</label><input id="correo" name="correo" type="email" required>
+<label for="mensaje">Mensaje</label><textarea id="mensaje" name="mensaje" rows="4" required></textarea>
+<p><button class="btn" type="submit">Enviar mensaje</button></p>
+<p id="estado-form" aria-live="polite"></p>
+</form>
+</div>
+<div class="card">
+<h3>Redes sociales</h3>
+<p>📸 Instagram: por confirmar</p>
+<p>🎵 TikTok: por confirmar</p>
+<p>✉️ Correo: por confirmar</p>
+</div>
+</div>
+</section>
+
+<section>
+<h2>Ubicación</h2>
+<iframe class="mapa" title="Mapa" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=-92.3%2C13.7%2C-88.2%2C17.9&amp;layer=mapnik"></iframe>
+</section>
+
+<section>
+<h2>Preguntas frecuentes</h2>
+<details><summary>¿Qué es SmartBin AI?</summary><p>Un prototipo de basurero inteligente que usa una cámara y Inteligencia Artificial para clasificar residuos como reciclables o no reciclables.</p></details>
+<details><summary>¿Cómo sabe qué residuo es?</summary><p>El modelo de IA se entrena con muchas imágenes de residuos ya clasificadas. Luego analiza imágenes nuevas y decide la categoría con cierto nivel de certeza.</p></details>
+<details><summary>¿Qué hace el Arduino?</summary><p>Recibe la señal de la computadora y activa un servomotor que abre la compuerta del compartimento correcto.</p></details>
+<details><summary>¿Ya está terminado?</summary><p>Es un prototipo que aún debe ser probado. Evaluaremos su precisión contando aciertos y desaciertos.</p></details>
+<details><summary>¿Dónde se podría usar?</summary><p>En colegios, hogares y espacios públicos.</p></details>
+</section>
+
+</main>
+<footer>
+<p>♻️ SmartBin AI · Feria Científica <span id="anio"></span></p>
+<p>Cristopher Alvarez · Hector Rosales · Lucía López · Malory Salazar · Paula García</p>
+</footer>
+</body>
+</html>

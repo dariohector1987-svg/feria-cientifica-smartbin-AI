@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proyecto | SmartBin AI</title>
+<meta name="description" content="SmartBin AI: basurero inteligente que clasifica residuos reciclables y no reciclables con Inteligencia Artificial.">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+<script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<header><nav>
+<a class="marca" href="index.html"><img src="assets/logo.svg" alt="Logo SmartBin AI">SmartBin AI</a>
+<a class="enlace" href="index.html">Inicio</a><a class="enlace" href="mision-vision.html">Misión y Visión</a><a class="enlace activo" href="proyecto.html">Proyecto</a><a class="enlace" href="contacto.html">Contacto</a>
+</nav></header>
+<main>
+
+<section>
+<h2>Soluciones tecnológicas y software Python</h2>
+<p class="aviso">🔧 <strong>Estado:</strong> SmartBin AI es un prototipo que aún debe ser probado. El simulador de esta página es didáctico: muestra la lógica del sistema, no mide su precisión real.</p>
+</section>
+
+<section>
+<h2>Objetivos</h2>
+<div class="card"><h3>Objetivo general</h3><p>Diseñar un prototipo de basurero inteligente que utilice Inteligencia Artificial para clasificar los residuos reciclables y no reciclables mediante el reconocimiento de imágenes con una cámara.</p></div>
+<h3>Objetivos específicos</h3>
+<ol>
+<li>Investigar cómo la inteligencia artificial puede reconocer objetos mediante una cámara.</li>
+<li>Proponer un mecanismo controlado por Arduino para dirigir los residuos al compartimento correspondiente.</li>
+<li>Promover la conciencia ambiental y la separación correcta de residuos.</li>
+<li>Entrenar el algoritmo de inteligencia artificial para reconocer los distintos residuos mediante imágenes.</li>
+<li>Evaluar la precisión del sistema calculando aciertos y desaciertos durante la clasificación.</li>
+</ol>
+</section>
+
+<section>
+<h2>Funcionamiento</h2>
+<ol class="pasos">
+<li>El usuario coloca un residuo en la zona de reconocimiento.</li>
+<li>La cámara capta la imagen del objeto.</li>
+<li>El modelo de inteligencia artificial analiza la imagen.</li>
+<li>El sistema clasifica el residuo como reciclable o no reciclable.</li>
+<li>La computadora envía una señal al Arduino.</li>
+<li>El Arduino activa un servomotor.</li>
+<li>La compuerta se abre hacia el compartimento correspondiente.</li>
+<li>El usuario deposita el residuo en el contenedor correspondiente.</li>
+</ol>
+</section>
+
+<section>
+<h2>Sensores, actuadores y materiales</h2>
+<div class="table-wrap"><table>
+<tr><th>Componente</th><th>Tipo</th><th>Función</th></tr>
+<tr><td>Cámara USB o ESP32-CAM</td><td>Sensor</td><td>Capta la imagen del residuo.</td></tr>
+<tr><td>Computadora</td><td>Procesamiento</td><td>Ejecuta el modelo de inteligencia artificial.</td></tr>
+<tr><td>Arduino Uno</td><td>Controlador</td><td>Recibe la señal de la computadora y controla los servomotores.</td></tr>
+<tr><td>Servomotores</td><td>Actuador</td><td>Abren la compuerta del compartimento correcto.</td></tr>
+<tr><td>Dos basureros con compuertas</td><td>Estructura</td><td>Reciclable y no reciclable.</td></tr>
+<tr><td>Protoboard y cables</td><td>Conexión</td><td>Unen los componentes electrónicos.</td></tr>
+<tr><td>Fuente de alimentación o batería</td><td>Energía</td><td>Alimenta el sistema.</td></tr>
+</table></div>
+</section>
+
+<section>
+<h2>Hipótesis y variables</h2>
+<div class="grid">
+<div class="card"><h3>Hipótesis</h3>
+<p><strong>1.</strong> Si se entrena el modelo con un catálogo variado de imágenes de residuos, la tasa de aciertos entre reciclable y no reciclable será mayor al 85%.</p>
+<p><strong>2.</strong> A mayor capacidad de procesamiento de la computadora, menor será el tiempo desde que la cámara detecta el residuo hasta que el servomotor acciona la compuerta.</p></div>
+<div class="card"><h3>Variables</h3>
+<p><strong>1.</strong> Porcentaje de precisión en la clasificación (aciertos vs. desaciertos).</p>
+<p><strong>2.</strong> Tiempo de respuesta del sistema, en segundos, desde la captura de la imagen hasta la apertura de la compuerta.</p></div>
+</div>
+</section>
+
+<section id="simulador">
+<h2>Simulador en Python</h2>
+<p>Elige un residuo y la certeza del modelo. El código Python (programación orientada a objetos) corre en tu navegador con PyScript.</p>
+<div class="sim">
+<div class="card">
+<label for="residuo">Residuo</label>
+<select id="residuo">
+<option value="Botella de plástico|1">Botella de plástico</option>
+<option value="Hoja de papel|1">Hoja de papel</option>
+<option value="Caja de cartón|1">Caja de cartón</option>
+<option value="Frasco de vidrio|1">Frasco de vidrio</option>
+<option value="Lata de aluminio|1">Lata de aluminio</option>
+<option value="Cáscara de naranja|0">Cáscara de naranja</option>
+<option value="Envoltorio sucio de comida|0">Envoltorio sucio de comida</option>
+<option value="Servilleta usada|0">Servilleta usada</option>
+</select>
+<label for="certeza">Certeza del modelo: <output id="v-certeza">90</output>%</label>
+<input type="range" id="certeza" min="50" max="100" value="90" oninput="document.getElementById('v-certeza').textContent=this.value">
+<p><button class="btn" py-click="simular">Simular clasificación</button></p>
+<div class="resultado" id="resultado" aria-live="polite">Presiona el botón para simular.</div>
+</div>
+<div class="card">
+<div class="bins">
+<div class="bin rec" id="bin-rec"><div class="tapa"></div><div class="cuerpo"></div>♻️ Reciclable</div>
+<div class="bin no" id="bin-no"><div class="tapa"></div><div class="cuerpo"></div>🗑️ No reciclable</div>
+</div>
+<div class="table-wrap"><table>
+<tr><th>Reciclables</th><th>No reciclables</th><th>Sin certeza</th></tr>
+<tr><td id="c-rec">0</td><td id="c-no">0</td><td id="c-dudas">0</td></tr>
+</table></div>
+</div>
+</div>
+</section>
+
+<section>
+<h2>Código Python (smartbin.py)</h2>
+<pre><code id="codigo">Cargando código…</code></pre>
+</section>
+
+<section>
+<h2>Video demostrativo</h2>
+<div class="video" id="video"></div>
+</section>
+
+</main>
+<footer>
+<p>♻️ SmartBin AI · Feria Científica <span id="anio"></span></p>
+<p>Cristopher Alvarez · Hector Rosales · Lucía López · Malory Salazar · Paula García</p>
+</footer>
+<script type="py" src="./smartbin.py"></script>
+</body>
+</html>
