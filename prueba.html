@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartBin AI</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- TensorFlow.js -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<!-- Teachable Machine -->
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+<style>
+:root{--verde:#2E6B34;--hoja:#6FA35B;--marron:#A0651E;--crema:#F5F2E7;--texto:#2B2F2B;--tarjeta:#fff;--borde:#d9d4c0;--rojo:#B8432F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Nunito',system-ui,Arial,sans-serif;background:var(--crema);color:var(--texto);line-height:1.5}
+h1,h2,h3{font-family:'Fredoka',system-ui,Arial,sans-serif;margin:0}
+
+/* Encabezado */
+header{background:var(--verde);color:#fff;padding:.8rem 1.2rem}
+.marca{max-width:1100px;margin:auto;display:flex;align-items:center;gap:.8rem}
+.marca .logo{font-size:2.4rem;line-height:1}
+.marca h1{font-size:1.7rem;color:#fff;letter-spacing:1px}
+.marca h1 span{color:#cfe8c3}
+.marca small{display:block;font-size:.75rem;letter-spacing:2px;text-transform:uppercase;opacity:.85}
+
+/* Distribución */
+main{max-width:1100px;margin:auto;padding:1.2rem 1rem 2.5rem;display:grid;grid-template-columns:1.5fr 1fr;gap:1rem;align-items:start}
+.col{display:grid;gap:1rem}
+@media(max-width:800px){main{grid-template-columns:1fr}}
+
+/* Tarjetas */
+.panel{background:var(--tarjeta);border:2px solid var(--borde);border-radius:18px;padding:1.1rem}
+.panel h2{display:flex;align-items:center;gap:.5rem;font-size:1.05rem;color:var(--verde);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.9rem}
+.panel h2 .ico{font-size:1.3rem}
+
+/* Cámara */
+.camara{position:relative;background:#dcd8c4;border:3px solid var(--hoja);border-radius:14px;overflow:hidden;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;text-align:center;color:#6b6f6b;font-weight:700}
+#webcam-container{position:absolute;inset:0}
+.camara video,.camara canvas{width:100%;height:100%;object-fit:cover;display:block}
+.camara .etiqueta{position:absolute;top:10px;left:10px;background:var(--verde);color:#fff;font-weight:700;font-size:.85rem;padding:.2rem .7rem;border-radius:999px;z-index:2;display:none}
+
+/* Estado del sistema (pasos) */
+.pasos-estado{display:flex;justify-content:space-between;margin-top:.5rem}
+.paso{flex:1;text-align:center;position:relative;font-weight:700;font-size:.9rem}
+.paso::before{content:"";position:absolute;top:13px;left:-50%;width:100%;height:4px;background:var(--borde);z-index:0}
+.paso:first-child::before{display:none}
+.paso .punto{position:relative;z-index:1;width:28px;height:28px;margin:0 auto .4rem;border-radius:50%;background:var(--borde);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.paso small{display:block;font-weight:700;color:#888}
+.paso.ok::before,.paso.ok .punto{background:var(--verde)}
+.paso.ok small{color:var(--verde)}
+.paso.activo::before{background:var(--verde)}
+.paso.activo .punto{background:#fff;border:3px solid var(--marron);color:var(--marron)}
+.paso.activo small{color:var(--marron)}
+
+/* Resultado de clasificación */
+.resultados{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.caja{border-radius:16px;color:#fff;text-align:center;padding:1rem .5rem;transition:transform .15s,box-shadow .15s}
+.caja:hover{transform:translateY(-3px);box-shadow:0 8px 18px rgba(46,107,52,.2)}
+.caja .ico{font-size:2rem;display:block}
+.caja .numero{font-family:'Fredoka',sans-serif;font-size:2.6rem;font-weight:600;line-height:1.1}
+.caja .texto{font-size:.8rem;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.caja.rec{background:linear-gradient(160deg,var(--hoja),var(--verde))}
+.caja.no{background:linear-gradient(160deg,#d9654f,var(--rojo))}
+
+/* Información del residuo */
+#estado{font-size:1rem;font-weight:700;margin:0 0 .6rem;color:var(--marron)}
+#resultado{font-family:'Fredoka',sans-serif;font-size:1.6rem;font-weight:600;color:var(--verde);margin:0 0 .6rem}
+#predicciones{font-size:.95rem;border-top:1px solid var(--borde);padding-top:.6rem}
+
+/* Botones */
+button{padding:.8rem 1.4rem;font:inherit;font-weight:700;font-size:1rem;border:0;border-radius:999px;cursor:pointer;color:#fff;width:100%;margin:.25rem 0;transition:transform .15s,background .15s}
+button:hover{transform:translateY(-2px)}
+#iniciar{background:var(--verde)}
+#iniciar:hover{background:#1f4a24}
+#arduino{background:var(--marron)}
+#arduino:hover{background:#7d4d13}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="marca">
+    <span class="logo">♻️</span>
+    <div>
+      <h1>SMARTBIN <span>IA</span></h1>
+      <small>Clasificador de residuos</small>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Columna izquierda -->
+  <div class="col">
+    <section class="panel">
+      <h2><span class="ico">📷</span> Cámara en vivo</h2>
+      <div class="camara">
+        <span id="sinCamara">Presiona "Iniciar cámara"</span>
+        <div id="webcam-container"></div>
+        <span class="etiqueta" id="etiqueta"></span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2><span class="ico">⚙️</span> Estado del sistema</h2>
+      <div class="pasos-estado">
+        <div class="paso" id="paso-camara"><div class="punto">1</div>Cámara<small>Inactiva</small></div>
+        <div class="paso" id="paso-ia"><div class="punto">2</div>Análisis IA<small>En espera</small></div>
+        <div class="paso" id="paso-clasif"><div class="punto">3</div>Clasificación<small>Pendiente</small></div>
+        <div class="paso" id="paso-compuerta"><div class="punto">4</div>Compuerta<small>Cerrada</small></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Columna derecha -->
+  <div class="col">
+    <section class="panel">
+      <h2><span class="ico">📊</span> Resultado de clasificación</h2>
+      <div class="resultados">
+        <div class="caja rec">
+          <span class="ico">♻️</span>
+          <div class="numero" id="pctRec">0%</div>
+          <div class="texto">Reciclable</div>
+        </div>
+        <div class="caja no">
+          <span class="ico">🗑️</span>
+          <div class="numero" id="pctNo">0%</div>
+          <div class="texto">No reciclable</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2><span class="ico">ℹ️</span> Información del residuo</h2>
+      <div id="estado">Listo para iniciar</div>
+      <div id="resultado">Esperando residuo...</div>
+      <div id="predicciones"></div>
+    </section>
+
+    <div>
+      <button id="iniciar" onclick="iniciarIA()">Iniciar cámara</button>
+      <button id="arduino" onclick="conectarArduino()">Conectar Arduino</button>
+    </div>
+  </div>
+</main>
+
+<script>
+
+// ==============================
+// CONFIGURACIÓN DEL MODELO
+// ==============================
+
+const URL = "./";
+
+let model;
+let webcam;
+
+let arduinoPort = null;
+let writer = null;
+
+let ultimaOrden = "";
+let ultimoEnvio = 0;
+
+
+// ==============================
+// PASOS DEL ESTADO DEL SISTEMA
+// ==============================
+
+// estado: "" (pendiente) | "ok" (completado) | "activo" (en curso)
+function setPaso(id, estado, texto, punto) {
+    const el = document.getElementById(id);
+    el.className = "paso " + estado;
+    el.querySelector("small").innerText = texto;
+    if (punto) el.querySelector(".punto").innerText = punto;
+}
+
+
+// ==============================
+// INICIAR IA
+// ==============================
+
+async function iniciarIA() {
+
+    document.getElementById("estado").innerText =
+        "Cargando modelo de IA...";
+
+    const modelURL = URL + "model.json";
+    const metadataURL = URL + "metadata.json";
+
+    try {
+
+        model = await tmImage.load(modelURL, metadataURL);
+
+        const maxPredictions = model.getTotalClasses();
+
+        // Crear cámara
+        const flip = true;
+        webcam = new tmImage.Webcam(320, 240, flip);
+
+        await webcam.setup();
+        await webcam.play();
+
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
+        document.getElementById("sinCamara").style.display = "none";
+
+        document.getElementById("estado").innerText = "🟢 IA funcionando";
+
+        setPaso("paso-camara", "ok", "Activa", "✓");
+        setPaso("paso-ia", "ok", "Procesando", "✓");
+
+        window.requestAnimationFrame(loop);
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("estado").innerText = "❌ Error al cargar la IA";
+
+        alert(
+            "No se pudo cargar el modelo. Revisa que model.json, metadata.json y weights.bin estén juntos."
+        );
+    }
+}
+
+
+// ==============================
+// BUCLE DE LA IA
+// ==============================
+
+async function loop() {
+
+    webcam.update();
+
+    await predecir();
+
+    window.requestAnimationFrame(loop);
+}
+
+
+// ==============================
+// HACER PREDICCIÓN
+// ==============================
+
+function esNoReciclable(nombre) {
+    nombre = nombre.toLowerCase();
+    return nombre.includes("no reciclable") || nombre.startsWith("no");
+}
+
+async function predecir() {
+
+    const predicciones = await model.predict(webcam.canvas);
+
+    let mejorPrediccion = predicciones[0];
+
+    for (let i = 1; i < predicciones.length; i++) {
+        if (predicciones[i].probability > mejorPrediccion.probability) {
+            mejorPrediccion = predicciones[i];
+        }
+    }
+
+    const clase = mejorPrediccion.className;
+    const confianza = mejorPrediccion.probability;
+
+    document.getElementById("resultado").innerText =
+        clase + " - " + (confianza * 100).toFixed(1) + "%";
+
+    // Etiqueta sobre la cámara
+    const etiqueta = document.getElementById("etiqueta");
+    etiqueta.style.display = "block";
+    etiqueta.innerText = clase + " " + confianza.toFixed(2);
+
+    // Mostrar ambas probabilidades y llenar las cajas verde / roja
+    let texto = "";
+    let pctRec = 0;
+    let pctNo = 0;
+
+    for (let p of predicciones) {
+
+        texto += p.className + ": " + (p.probability * 100).toFixed(1) + "%<br>";
+
+        if (esNoReciclable(p.className)) {
+            pctNo = p.probability * 100;
+        } else {
+            pctRec = p.probability * 100;
+        }
+    }
+
+    document.getElementById("predicciones").innerHTML = texto;
+    document.getElementById("pctRec").innerText = pctRec.toFixed(0) + "%";
+    document.getElementById("pctNo").innerText = pctNo.toFixed(0) + "%";
+
+
+    // ==============================
+    // ESTADO DEL SISTEMA + ARDUINO
+    // ==============================
+
+    if (confianza >= 0.85) {
+
+        setPaso("paso-clasif", "ok", "Completado", "✓");
+
+        const nombre = clase.toLowerCase();
+
+        if (nombre.includes("reciclable") && !nombre.includes("no")) {
+            enviarArduino("R");
+        } else if (nombre.includes("no reciclable")) {
+            enviarArduino("N");
+        }
+
+        if (writer) {
+            setPaso("paso-compuerta", "activo", "Abierta", "●");
+        } else {
+            setPaso("paso-compuerta", "", "Sin Arduino", "4");
+        }
+
+    } else {
+
+        setPaso("paso-clasif", "activo", "Analizando", "●");
+        setPaso("paso-compuerta", "", "Cerrada", "4");
+    }
+}
+
+
+// ==============================
+// CONECTAR ARDUINO
+// ==============================
+
+async function conectarArduino() {
+
+    if (!("serial" in navigator)) {
+        alert("Tu navegador no permite Web Serial. Usa Google Chrome o Microsoft Edge.");
+        return;
+    }
+
+    try {
+
+        arduinoPort = await navigator.serial.requestPort();
+
+        await arduinoPort.open({ baudRate: 9600 });
+
+        writer = arduinoPort.writable.getWriter();
+
+        document.getElementById("estado").innerText = "🟢 Arduino conectado";
+
+        // El Arduino suele reiniciarse al conectar USB.
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+    } catch (error) {
+
+        console.error(error);
+        alert("No se pudo conectar al Arduino.");
+    }
+}
+
+
+// ==============================
+// ENVIAR ORDEN
+// ==============================
+
+async function enviarArduino(orden) {
+
+    if (!writer) {
+        return;
+    }
+
+    const ahora = Date.now();
+
+    // Evitar mandar la misma orden constantemente
+    if (orden === ultimaOrden && ahora - ultimoEnvio < 3000) {
+        return;
+    }
+
+    ultimaOrden = orden;
+    ultimoEnvio = ahora;
+
+    const encoder = new TextEncoder();
+
+    await writer.write(encoder.encode(orden));
+
+    console.log("Enviado al Arduino:", orden);
+}
+
+</script>
+
+</body>
+</html>
